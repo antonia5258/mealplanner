@@ -1701,10 +1701,18 @@
     if (LOCAL && LOCAL.startRecipe) { var first = recipes.find(function (x) { return x.name === LOCAL.startRecipe; }); if (first) openDetail(first.id); }
   }
 
+  // Supabase shows several addresses that start with the project URL (e.g. .../rest/v1/).
+  // Only the part up to ".supabase.co" is wanted, so anything after it is dropped.
+  function cleanConfig(c) {
+    var url = String(c.supabaseUrl || '').trim();
+    try { url = new URL(url).origin; } catch (e) { /* leave as typed */ }
+    return { supabaseUrl: url, supabaseKey: String(c.supabaseKey || '').trim() };
+  }
+
   function getConfig() {
     var c = window.MP_CONFIG || {};
-    if (c.supabaseUrl && c.supabaseKey) return c;
-    try { var s = JSON.parse(localStorage.getItem(CFG_KEY) || 'null'); if (s && s.supabaseUrl && s.supabaseKey) return s; } catch (e) { /* ignore */ }
+    if (c.supabaseUrl && c.supabaseKey) return cleanConfig(c);
+    try { var s = JSON.parse(localStorage.getItem(CFG_KEY) || 'null'); if (s && s.supabaseUrl && s.supabaseKey) return cleanConfig(s); } catch (e) { /* ignore */ }
     return null;
   }
 
